@@ -1,0 +1,139 @@
+{% extends 'inventory/base_template.html' %}
+{% load dict_utils %}
+
+
+{% block content %}
+
+<h1>Payment Report</h1>
+
+<!-- Filter Form -->
+<form method="get" class="filter-form">
+    <label for="start_date">Start Date:</label>
+    <input type="date" name="start_date" value="{{ start_date|default:today }}">
+
+    <label for="end_date">End Date:</label>
+    <input type="date" name="end_date" value="{{ end_date|default:today }}">
+
+    <label>Locations:</label>
+    {% for location in all_locations %}
+        <label style="margin-left: 10px;">
+            <input type="checkbox" name="locations" value="{{ location }}" 
+                {% if not selected_locations or location in selected_locations %}checked{% endif %}>
+            {{ location }}
+        </label>
+    {% endfor %}
+
+    <button type="submit" class="action-button">Generate Report</button>
+</form>
+
+<hr>
+
+<!-- Report Display -->
+{% if report %}
+    {% for location, methods in report.items %}
+        <h2>Location: {{ location }}</h2>
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Payment Method</th>
+                    <th>Paid</th>
+                    <th>Unpaid</th>
+                    <th> test 1</th>
+                    <th> test 2</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for method, data in methods.items %}
+                    <tr>
+                        <td>{{ method }}</td>
+                        <td>{{ data.Paid|floatformat:2 }}</td>
+                        <td>{{ data.Unpaid|floatformat:2 }}</td>
+                        <td>{{ data.Discount|default_if_none:0|floatformat:2 }}</td>
+                        <td>{{ data.Net|default_if_none:0|floatformat:2 }}</td>
+                    </tr>
+
+                    {% if method == "Credit Card" or method == "Debit Card" %}
+                        {% with location_breakdown=bank_breakdown|dict_get:location %}
+                            {% if location_breakdown %}
+                                {% with breakdown=location_breakdown|dict_get:method %}
+                                    {% if breakdown %}
+                                        {% for bank, bank_vals in breakdown.items %}
+                                            <tr style="font-size: 13px;">
+                                                <td style="padding-left: 30px;" >→ {{ bank }}</td>
+                                                <td>{{ bank_vals.Paid|floatformat:2 }}</td>
+                                                <td>{{ bank_vals.Unpaid|floatformat:2 }}</td>
+                                                <td>{{ bank_vals.Discount|default_if_none:0|floatformat:2 }}</td>
+                                                <td>{{ bank_vals.Net|default_if_none:0|floatformat:2 }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        {% endwith %}
+                    {% endif %}
+
+                {% endfor %}
+
+            <tr>
+                <td><strong>Total</strong></td>
+                <td><strong>{{ location_totals|dict_get:location|dict_get:"Paid"|floatformat:2 }}</strong></td>
+                <td><strong>{{ location_totals|dict_get:location|dict_get:"Unpaid"|floatformat:2 }}</strong></td>
+                <td>{{ location_totals|dict_get:location|dict_get:"Discount"|floatformat:2 }}</td>
+                <td>{{ location_totals|dict_get:location|dict_get:"Net"|floatformat:2 }}</td>
+            </tr>
+            </tr>
+                <td><strong>{{ location }} Grand Total</strong></td>
+                <td><strong>{{ location_totals|dict_get:location|dict_get:"Total"|floatformat:2 }}</strong></td>
+            </tr>
+            </tbody>
+        </table>
+
+    {% endfor %}
+{% elif start_date or end_date or selected_locations %}
+    <p>No matching records found.</p>
+{% endif %}
+
+<!-- Save and Print Buttons -->
+<div class="fixed-buttons" style="position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 100;">
+    <form method="get" action="{% url 'inventory:v2-payment-report-export' %}">
+        {% for key, values in request.GET.lists %}
+            {% for value in values %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endfor %}
+        {% endfor %}
+        <button type="submit" class="action-button">Save as XLSX File</button>
+    </form>
+</div>
+
+<style>
+    .fixed-buttons {
+        position: fixed;
+        bottom: 20px; /* Distance from the bottom of the page */
+        right: 20px; /* Distance from the right edge of the page */
+        display: flex;
+        flex-direction: row; /* Arrange buttons vertically */
+        gap: 10px; /* Space between buttons */
+    }
+
+    /* Style for buttons */
+    .action-button {
+        padding: 10px 20px;
+        font-size: 14px;
+        background-color: #007bff; /* Button color */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-align: center;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Optional shadow */
+        transition: background-color 0.3s ease;
+    }
+
+    /* Hover effect for buttons */
+    .action-button:hover {
+        background-color: #0056b3; /* Darker shade for hover */
+    }
+
+</style>
+
+{% endblock %}

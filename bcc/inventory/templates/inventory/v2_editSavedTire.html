@@ -1,0 +1,366 @@
+{% extends 'inventory/base_template.html' %}
+
+{% block content %}
+
+<div class="container">
+    <form method="POST" class="transaction-form">
+        {% csrf_token %}
+
+        <h1>Edit Saved Tire</h1>
+
+        <div class="form-group" style="display: flex; flex-wrap: wrap; gap: 10px;">
+
+            <div class="form-group">
+                <label for="qty">Quantity:<span style="color: red;">**</span></label>
+                <input type="number" name="qty" id="qty" min="1" required value="{{ form.qty.value }}">
+            </div>
+
+            <div class="form-group">
+                <label for="brand">Brand:<span style="color: red;">**</span></label>
+                <select name="brand" id="brand" required>
+                    <option value="" {% if not form.initial.brand %}selected{% endif %}></option>
+                    {% for brand_value, brand_display in form.fields.brand.choices %}
+                        {% if brand_value %}
+                            <option value="{{ brand_value }}" {% if form.initial.brand == brand_value %}selected{% endif %}>
+                                {{ brand_display }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="size">Size:<span style="color: red;">**</span></label>
+                <select name="size" id="size" required>
+                    <!-- Dynamically populated -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="model">Model:<span style="color: red;">**</span></label>
+                <select name="model" id="model" required>
+                    <!-- Dynamically populated -->
+                </select>
+            </div>
+        
+            <div class="form-group">
+                <label for="specs">Specs:<span style="color: red;">**</span></label>
+                <select name="specs" id="specs" required>
+                    <!-- Dynamically populated -->
+                </select>
+            </div>
+        
+            <div class="form-group">
+                <label for="load">Load:</label>
+                <select name="load" id="load">
+                    <!-- Dynamically populated -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="remarks">Remarks:</label>
+                <select name="remarks" id="remarks">
+                    <!-- Dynamically populated -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="supplier">Supplier:</label>
+                <select name="supplier" id="supplier">
+                    <option value="" {% if not form.initial.location %}selected{% endif %}></option>
+                    {% for supplier_value, supplier_display in form.fields.supplier.choices %}
+                        {% if supplier_value %}
+                            <option value="{{ supplier_value }}" {% if form.initial.supplier == supplier_value %}selected{% endif %}>
+                                {{ supplier_display }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes:</label>
+                <input type="text" name="notes" id="notes" value="{{ form.notes.value|default:'' }}">
+            </div>
+
+            <p><span style="color: red;">**</span> <em>- required for all transactions</em></p>
+
+        </div>
+
+        <!-- Buttons -->
+        <div class="form-group" style="margin-top: 20px; text-align: center;">
+            <button type="submit" class="submit-btn button-link">Update Saved Tire</button>
+            <button type="button" class="cancel-btn button-link" 
+                    onclick="window.location.href='/inventory/v2/tires/'">
+                Cancel
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .transaction-form {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box; /* Ensure all padding and borders are included in width/height */
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+        padding: 12px; /* Increased padding for taller input/select boxes */
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        transition: border-color 0.3s ease, background-color 0.3s ease;
+        width: 100%; /* Ensure fields fit within the container */
+        box-sizing: border-box; /* Ensure padding and borders don't extend the width */
+    }
+
+    /* Styling for input fields */
+    .form-group input[type="number"], 
+    .form-group input[type="text"], 
+    .form-group input[type="datetime-local"] {
+        background-color: #ffffff; /* White background for text inputs */
+    }
+
+    /* Styling for select boxes */
+    .form-group select {
+        background-color: #f2f2f2; /* Light grey background for select boxes */
+        border: 1px solid #aaa; /* Slightly darker border for select */
+        color: #333; /* Dark text color for contrast */
+        font-family: 'Arial', sans-serif; /* Font change for differentiation */
+        height: 48px; /* Set height to make select box taller */
+    }
+
+    .form-group select:focus {
+        border-color: #007bff; /* Highlight border on focus */
+        background-color: #e0f7ff; /* Light blue background when focused */
+    }
+
+    .form-group input[type="text"]:focus, 
+    .form-group input[type="number"]:focus, 
+    .form-group input[type="datetime-local"]:focus {
+        border-color: #007bff; /* Highlight border on focus for text inputs */
+        background-color: #f0f8ff; /* Light blue background for text inputs */
+    }
+
+    .submit-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 15px 32px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .cancel-btn {
+        background-color: #fd0000;
+        color: #ffffff;
+        padding: 15px 32px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .cancel-btn:hover {
+        background-color: #b50202;
+    }
+
+</style>
+
+<script>
+    // Inject dependency data from the backend
+    const brandSizeChoices = JSON.parse('{{ brand_size_choices|safe }}');
+    const modelSpecsChoices = JSON.parse('{{ model_specs_choices|safe }}');
+    const specsLoadChoices = JSON.parse('{{ specs_load_choices|safe }}');
+    const specsRemarksChoices = JSON.parse('{{ specs_remarks_choices|safe }}');
+    const originalSizeChoice = '{{ tireTransaction.size|default:"" }}';
+    const originalModelChoice = '{{ tireTransaction.model|default:"" }}';
+    const originalSpecsChoice = '{{ tireTransaction.specs|default:"" }}';
+    const originalLoadChoice = '{{ tireTransaction.load|default:"" }}';
+    const originalRemarksChoice = '{{ tireTransaction.remarks|default:"" }}';
+
+    // Populate Size based on Brand
+    document.getElementById('brand').addEventListener('change', function() {
+        const brand = this.value;
+        const sizeSelect = document.getElementById('size');
+        sizeSelect.innerHTML = ''; // Clear the existing size options
+
+        if (brandSizeChoices[brand]) {
+            const sizes = Object.keys(brandSizeChoices[brand]).map(Number).sort((a, b) => a - b);
+
+            // Add a placeholder option
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = '';
+            placeholderOption.disabled = true;
+            sizeSelect.appendChild(placeholderOption);
+
+            // Add valid size options
+            sizes.forEach(function(size) {
+                const option = document.createElement('option');
+                option.value = size;
+                option.textContent = size;
+
+                // Preselect if it's the original choice
+                if (String(size) === originalSizeChoice) {
+                    option.selected = true;
+                }
+                sizeSelect.appendChild(option);
+            });
+        }
+
+        // Trigger size change so that dependent dropdowns update
+        sizeSelect.dispatchEvent(new Event('change'));
+    });
+
+    // Populate Model based on Size
+    document.getElementById('size').addEventListener('change', function () {
+        const brand = document.getElementById('brand').value;
+        const size = parseInt(this.value);
+        const modelSelect = document.getElementById('model');
+        modelSelect.innerHTML = '';
+
+        if (brandSizeChoices[brand] && brandSizeChoices[brand][size]) {
+            const models = brandSizeChoices[brand][size].sort();
+
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = '';
+            placeholder.disabled = true;
+            placeholder.selected = true;
+            modelSelect.appendChild(placeholder);
+
+            models.forEach(function (model) {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                if (model === originalModelChoice) {
+                    option.selected = true;
+                }
+                modelSelect.appendChild(option);
+            });
+        }
+
+        modelSelect.dispatchEvent(new Event('change'));
+    });
+
+
+
+    // Populate Specs based on Model
+    document.getElementById('model').addEventListener('change', function () {
+        const model = this.value;
+        const size = parseInt(document.getElementById('size').value);
+        const specsSelect = document.getElementById('specs');
+        specsSelect.innerHTML = '';
+
+        if (modelSpecsChoices[model] && modelSpecsChoices[model][size]) {
+            const specsList = modelSpecsChoices[model][size].sort();
+
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = '';
+            placeholder.disabled = true;
+            placeholder.selected = true;
+            specsSelect.appendChild(placeholder);
+
+            specsList.forEach(function (spec) {
+                const option = document.createElement('option');
+                option.value = spec;
+                option.textContent = spec;
+                if (spec === originalSpecsChoice) {
+                    option.selected = true;
+                }
+                specsSelect.appendChild(option);
+            });
+        }
+
+        specsSelect.dispatchEvent(new Event('change'));
+    });
+
+
+
+    // Single event listener for the 'specs' select element
+    document.getElementById('specs').addEventListener('change', function () {
+        const specs = this.value;
+
+        // Load
+        const loadSelect = document.getElementById('load');
+        loadSelect.innerHTML = '';
+        if (specsLoadChoices[specs]) {
+            const loads = specsLoadChoices[specs];
+
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = '';
+            placeholder.disabled = true;
+            placeholder.selected = true;
+            loadSelect.appendChild(placeholder);
+
+            loads.forEach(function (load) {
+                const option = document.createElement('option');
+                option.value = load;
+                option.textContent = load;
+                if (load === originalLoadChoice) {
+                    option.selected = true;
+                }
+                loadSelect.appendChild(option);
+            });
+        }
+
+        // Remarks
+        const remarksSelect = document.getElementById('remarks');
+        remarksSelect.innerHTML = '';
+        if (specsRemarksChoices[specs]) {
+            const remarksList = specsRemarksChoices[specs];
+
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = '';
+            placeholder.disabled = true;
+            placeholder.selected = true;
+            remarksSelect.appendChild(placeholder);
+
+            remarksList.forEach(function (remarks) {
+                const option = document.createElement('option');
+                option.value = remarks;
+                option.textContent = remarks;
+                if (remarks === originalRemarksChoice) {
+                    option.selected = true;
+                }
+                remarksSelect.appendChild(option);
+            });
+        }
+    });
+
+    // Trigger the brand change event to load size options on page load
+    document.getElementById('brand').dispatchEvent(new Event('change'));
+
+</script>
+
+{% endblock %}
+

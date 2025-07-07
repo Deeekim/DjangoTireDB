@@ -1,0 +1,508 @@
+{% extends 'inventory/base_template.html' %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+    <!-- LEFT: Transaction Form -->
+    <div class="container" style="width: 40%;">
+        <form method="POST" id="transaction-form">
+            {% csrf_token %}
+
+            <h1>Create Transaction</h1>
+
+            <div class="form-group" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <div class="form-group">
+                    <label for="invoice_number">Invoice Number:<span style="color: red;">**</span></label>
+                    <input type="number" name="invoice_number" id="invoice_number" value="{{ form.invoice_number.value }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="sold_to">Sold To:<span style="color: red;">**</span></label>
+                    <input type="text" name="sold_to" id="sold_to" value="{{ form.sold_to.value|default:'' }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date:<span style="color: red;">**</span></label>
+                    <input type="date" name="date" id="date" value="{{ form.date.value }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="salesperson">Salesperson:</label>
+                    <input type="text" name="salesperson" id="salesperson" value="{{ form.salesperson.value|default:'' }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location:<span style="color: red;">**</span></label>
+                    <select name="location" id="location" required>
+                        <option value="" {% if not form.initial.location %}selected{% endif %}></option>
+                        {% for location_value, location_display in form.fields.location.choices %}
+                            {% if location_value %}
+                                <option value="{{ location_value }}" {% if form.initial.location == location_value %}selected{% endif %}>
+                                    {{ location_display }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="transaction_type">Transaction Type:<span style="color: red;">**</span></label>
+                    <select name="transaction_type" id="transaction_type" required>
+                        <option value="" {% if not form.initial.location %}selected{% endif %}></option>
+                        {% for transaction_value, transaction_display in form.fields.transaction_type.choices %}
+                            {% if transaction_value %}
+                                <option value="{{ transaction_value }}" {% if form.initial.transaction_type == transaction_value %}selected{% endif %}>
+                                    {{ transaction_display }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="service">With Services(s):</label>
+                    <input type="checkbox" name="service" id="service" {% if form.service.value %}checked{% endif %}>
+                </div>
+
+                <div class="form-group">
+                    <label for="total_payment">Total Transaction Amount:</label>
+                    <input type="text" id="total_payment" class="form-control" readonly value="₱0.00">
+                </div>
+
+
+                <div class="form-group">
+                    <label for="notes">Notes:</label>
+                    <input type="text" name="notes" id="notes" value="{{ form.notes.value|default:'' }}">
+                </div>
+
+            </div>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {{ message.tags }}">
+                    {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <button type="submit" class="confirm-btn">Confirm Transaction</button>
+            <button type="button" class="cancel-btn button-link" 
+                    onclick="window.location.href='/inventory/v2/transaction/cancel/'">
+                Cancel
+            </button>
+        </form>
+    </div>
+
+    <!-- RIGHT: Payment Methods Panel -->
+    <div style="
+        width: 50%;
+        margin-top: 40px;
+        background: rgb(248, 248, 248);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    ">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 5px 0px;">Payment Methods</h2>
+            <a href="{% url 'inventory:v2-add-payment' %}" class="payment-btn">+ Add Payment</a>
+        </div>
+
+        {% if added_payments %}
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+                {% for payment in added_payments %}
+                    <li style="
+                        background: #f1f1f1;
+                        border-radius: 8px;
+                        padding: 12px 16px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+                    ">
+                        <div class="payment-entry" data-amount="{{ payment.amount }}">
+                            <div style="display: flex; justify-content: space-between;">
+                                <div>
+                                    <strong>
+                                        {% if payment.method == "Credit Card" %}
+                                            Credit Card ({{ payment.credit_card_type }})
+                                        {% elif payment.method == "Debit Card" %}
+                                            Debit Card ({{ payment.debit_card_bank }})
+                                        {% elif payment.method == "Cheque" %}
+                                            Cheque (On date: {{ payment.cheque_on_date }})
+                                        {% else %}
+                                            {{ payment.method }}
+                                        {% endif %}
+                                    </strong>
+                                    – ₱{{ payment.amount }}
+                                </div>
+                                <div>
+                                    <a href="{% url 'inventory:v2-edit-payment' forloop.counter0 %}" class="action-btn edit-btn">Edit</a>
+                                    <a href="{% url 'inventory:v2-delete-payment' forloop.counter0 %}" class="action-btn cancel-btn">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.9em;">
+                            {% if payment.status %}
+                                <span style="color: green;">✔ Payment Received</span>
+                            {% else %}
+                                <span style="color: #999;">Pending</span>
+                            {% endif %}
+                        </div>
+                        {% if payment.notes %}
+                            <div style="font-size: 0.85em; color: #555;">{{ payment.notes }}</div>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p style="color: #777;">No payment methods added yet.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<hr>
+
+<h1>Tires Added:</h1>
+
+{% if added_tires %}
+<table border="1" cellspacing="0" cellpadding="8" style="margin-bottom: 40px;">
+    <thead>
+        <tr>
+            <th>Quantity</th>
+            <th>Brand</th>
+            <th>Model</th>
+            <th>Size</th>
+            <th>Specs</th>
+            <th>Load</th>
+            <th>Supplier</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tire in added_tires %}
+        <tr>
+            <td>{{ tire.qty }}</td>
+            <td>{{ tire.brand }}</td>
+            <td>{{ tire.model }}</td>
+            <td>{{ tire.size }}</td>
+            <td>{{ tire.specs }}</td>
+            <td>{{ tire.load }}</td>
+            <td>{{ tire.supplier }}</td>
+            <td>
+                <a href="{% url 'inventory:v2-edit-tire' forloop.counter0 %}">Edit</a> |
+                <a href="{% url 'inventory:v2-delete-tire' forloop.counter0 %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <div class="empty-message">
+        <p>No tires added yet.</p>
+    </div>
+{% endif %}
+
+<div class="button-wrapper">
+    <a href="{% url 'inventory:v2-add-tire' %}" class="submit-btn">Add Tire</a>
+</div>
+
+
+<h1>Magwheels Added:</h1>
+
+{% if added_magwheels %}
+<table border="1" cellspacing="0" cellpadding="8" style="margin-bottom: 30px;">
+    <thead>
+        <tr>
+            <th>Quantity</th>
+            <th>Brand</th>
+            <th>Size</th>
+            <th>Model</th>
+            <th>PCD</th>
+            <th>Offset</th>
+            <th>Bore</th>
+            <th>Color</th>
+            <th>Supplier</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mag in added_magwheels %}
+        <tr>
+            <td>{{ mag.qty }}</td>
+            <td>{{ mag.brand }}</td>
+            <td>{{ mag.size }}</td>
+            <td>{{ mag.model }}</td>
+            <td>{{ mag.pcd1 }}{% if mag.pcd2 %}/{{ mag.pcd2 }}{% endif %}</td>
+            <td>{{ mag.offset }}</td>
+            <td>{% if mag.bore %}{{ mag.bore }}{% endif %}</td>
+            <td>{{ mag.color }}</td>
+            <td>{{ mag.supplier }}</td>
+            <td>
+                <a href="{% url 'inventory:v2-edit-magwheel' forloop.counter0 %}">Edit</a> |
+                <a href="{% url 'inventory:v2-delete-magwheel' forloop.counter0 %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+    <div class="empty-message">
+        <p>No Magwheels added yet.</p>
+    </div>
+{% endif %}
+
+
+<div class="button-wrapper">
+    <a href="{% url 'inventory:v2-add-magwheel' %}" class="submit-btn">Add Magwheel</a>
+</div>
+
+
+
+<style>
+    .transaction-form {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box; /* Ensure all padding and borders are included in width/height */
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+        padding: 8px; /* Increased padding for taller input/select boxes */
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        transition: border-color 0.3s ease, background-color 0.3s ease;
+        width: 100%; /* Ensure fields fit within the container */
+        box-sizing: border-box; /* Ensure padding and borders don't extend the width */
+    }
+
+    /* Styling for input fields */
+    .form-group input[type="number"], 
+    .form-group input[type="text"], 
+    .form-group input[type="datetime-local"] {
+        background-color: #ffffff; /* White background for text inputs */
+    }
+
+    /* Styling for select boxes */
+    .form-group select {
+        background-color: #f2f2f2; /* Light grey background for select boxes */
+        border: 1px solid #aaa; /* Slightly darker border for select */
+        color: #333; /* Dark text color for contrast */
+        font-family: 'Arial', sans-serif; /* Font change for differentiation */
+        height: 36px; /* Set height to make select box taller */
+    }
+
+    .form-group select:focus {
+        border-color: #007bff; /* Highlight border on focus */
+        background-color: #e0f7ff; /* Light blue background when focused */
+    }
+
+    .form-group input[type="text"]:focus, 
+    .form-group input[type="number"]:focus, 
+    .form-group input[type="datetime-local"]:focus {
+        border-color: #007bff; /* Highlight border on focus for text inputs */
+        background-color: #f0f8ff; /* Light blue background for text inputs */
+    }
+
+    .form-group input[type="checkbox"],
+    .form-group input[type="radio"] {
+        transform: scale(2.4) translateX(2px);
+        transform-origin: left center;
+        width: 10px;
+        height: 30px;
+        accent-color: #3f88f0;
+        cursor: pointer;
+    }
+
+    .submit-btn {
+        display: inline-block;
+        background-color: #3f88f0;
+        color: #fff;
+        padding: 14px 28px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: background-color 0.3s ease, box-shadow 0.2s ease;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .submit-btn:hover {
+        background-color: #0056b3;
+    }
+    
+    .button-wrapper {
+        text-align: right;
+    }
+
+
+    .confirm-btn {
+        background-color: #28a745;
+        color: white;
+        padding: 12px 24px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 49.5%;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        text-decoration: none;
+    }
+
+    .confirm-btn:hover {
+        background-color: #218838;
+    }
+
+    .cancel-btn {
+        background-color: #fd0000;
+        color: #ffffff;
+        padding: 12px 24px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 49.5%;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        text-decoration: none;
+
+    }
+
+    .cancel-btn:hover {
+        background-color: #b50202;
+    }
+
+    .empty-message {
+        margin-bottom: 20px;
+        padding: 30px;
+        background-color: #fefefe;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 17px;
+        color: #666;
+    }
+
+    .payment-action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 8px;
+        justify-content: flex-start; /* Aligns buttons to the left */
+        flex-wrap: wrap; /* Ensures they wrap properly on smaller screens */
+    }
+
+
+    .action-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 300;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background-color 0.3s ease;
+    }
+
+    .edit-btn {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .edit-btn:hover {
+        background-color: #218838;
+    }
+
+    .delete-btn {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .delete-btn:hover {
+        background-color: #a71d2a;
+    }
+
+    .payment-btn {
+        padding: 8px 16px;
+        font-size: 16px;
+        font-weight: 300;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background-color 0.3s ease;
+        background-color: #3f88f0;
+        color: #fff;
+    }
+
+    .payment-btn:hover{
+        background-color: #0056b3;
+    }
+
+    .alert {
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+    .alert.warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('#transaction-form');
+
+    if (form) {
+        form.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('change', () => {
+                const formData = new FormData(form);
+
+                fetch("{% url 'inventory:v2-save-transaction-draft' %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                }).then(response => {
+                    if (!response.ok) {
+                        console.warn('Auto-save failed.');
+                    }
+                });
+            });
+        });
+    }
+});
+
+function updateTotalAmount() {
+    let total = 0;
+    document.querySelectorAll('.payment-entry').forEach(div => {
+        const val = parseFloat(div.dataset.amount || 0);
+        total += val;
+    });
+    document.getElementById('total_payment').value = '₱' + total.toFixed(2);
+}
+
+// Run once on page load
+document.addEventListener('DOMContentLoaded', updateTotalAmount);
+</script>
+
+{% endblock %}

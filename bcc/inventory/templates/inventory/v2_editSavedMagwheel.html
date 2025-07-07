@@ -1,0 +1,423 @@
+{% extends 'inventory/base_template.html' %}
+
+{% block content %}
+
+<div class="container">
+    <form method="POST" class="transaction-form">
+        {% csrf_token %}
+
+        <h1>Edit Magwheel</h1>
+
+        <div class="form-group" style="display: flex; flex-wrap: wrap; gap: 10px;">
+
+            <div class="form-group">
+                <label for="qty">Quantity:<span style="color: red;">**</span></label>
+                <input type="number" name="qty" id="qty" min="1" required value="{{ form.qty.value }}">
+            </div>
+
+            <div class="form-group">
+                <label for="brand">Brand:<span style="color: red;">**</span></label>
+                <select name="brand" id="brand" required>
+                    <option value="" {% if not form.initial.location %}selected{% endif %}></option>
+                    {% for brand_value, brand_display in form.fields.brand.choices %}
+                        {% if brand_value %}
+                            <option value="{{ brand_value }}" {% if form.initial.brand == brand_value %}selected{% endif %}>
+                                {{ brand_display }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="size">Size:<span style="color: red;">**</span></label>
+                <select name="size" id="size" required>
+                    <!-- Populate dynamically -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="model">Model:<span style="color: red;">**</span></label>
+                <select name="model" id="model" required>
+                    <!-- Populate dynamically -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="pcd1">PCD 1:<span style="color: red;">**</span></label>
+                <select name="pcd1" id="pcd1" required>
+                    <!-- Populate dynamically -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="pcd2">PCD 2:</label>
+                <select name="pcd2" id="pcd2">
+                    <!-- Populate dynamically -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="offset">Offset:<span style="color: red;">**</span></label>
+                <select name="offset" id="offset" required>
+                    <!-- Populate dynamically -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="bore">Hole Bore:</label>
+                <select name="bore" id="bore">
+                    <!-- Populate dynamically -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="color">Color:<span style="color: red;">**</span></label>
+                <select name="color" id="color" required>
+                    <!-- Populate dynamically -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="supplier">Supplier:</label>
+                <select name="supplier" id="supplier">
+                    <option value="" {% if not form.initial.location %}selected{% endif %}></option>
+                    {% for supplier_value, supplier_display in form.fields.supplier.choices %}
+                        {% if supplier_value %}
+                            <option value="{{ supplier_value }}" {% if form.initial.supplier == supplier_value %}selected{% endif %}>
+                                {{ supplier_display }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes:</label>
+                <input type="text" name="notes" id="notes" value="{{ form.notes.value|default:'' }}">
+            </div>
+
+            <p><span style="color: red;">**</span> <em>- required for all transactions</em></p>
+
+        </div>
+
+        <!-- Buttons -->
+        <div class="form-group" style="margin-top: 20px; text-align: center;">
+            <button type="submit" class="submit-btn button-link">Update Saved Magwheel</button>
+            <button type="button" class="cancel-btn button-link" 
+                    onclick="window.location.href='/inventory/v2/magwheels/'">
+                Cancel
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .transaction-form {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box; /* Ensure all padding and borders are included in width/height */
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+        padding: 12px; /* Increased padding for taller input/select boxes */
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        transition: border-color 0.3s ease, background-color 0.3s ease;
+        width: 100%; /* Ensure fields fit within the container */
+        box-sizing: border-box; /* Ensure padding and borders don't extend the width */
+    }
+
+    /* Styling for input fields */
+    .form-group input[type="number"], 
+    .form-group input[type="text"], 
+    .form-group input[type="datetime-local"] {
+        background-color: #ffffff; /* White background for text inputs */
+    }
+
+    /* Styling for select boxes */
+    .form-group select {
+        background-color: #f2f2f2; /* Light grey background for select boxes */
+        border: 1px solid #aaa; /* Slightly darker border for select */
+        color: #333; /* Dark text color for contrast */
+        font-family: 'Arial', sans-serif; /* Font change for differentiation */
+        height: 48px; /* Set height to make select box taller */
+    }
+
+    .form-group select:focus {
+        border-color: #007bff; /* Highlight border on focus */
+        background-color: #e0f7ff; /* Light blue background when focused */
+    }
+
+    .form-group input[type="text"]:focus, 
+    .form-group input[type="number"]:focus, 
+    .form-group input[type="datetime-local"]:focus {
+        border-color: #007bff; /* Highlight border on focus for text inputs */
+        background-color: #f0f8ff; /* Light blue background for text inputs */
+    }
+
+    .submit-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 15px 32px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .cancel-btn {
+        background-color: #fd0000;
+        color: #ffffff;
+        padding: 15px 32px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .cancel-btn:hover {
+        background-color: #b50202;
+    }
+
+</style>
+
+<script>
+    // Inject dependency data from the backend
+    const brandSizeChoices = JSON.parse('{{ brand_size_choices|safe }}');
+    const modelPCD1Choices = JSON.parse('{{ model_pcd1_choices|safe }}');
+    const modelPCD2Choices = JSON.parse('{{ model_pcd2_choices|safe }}');
+    const modelOffsetChoices = JSON.parse('{{ model_offset_choices|safe }}');
+    const modelBoreChoices = JSON.parse('{{ model_bore_choices|safe }}');
+    const modelColorChoices = JSON.parse('{{ model_color_choices|safe }}');
+    const originalSizeChoice = '{{ magwheelTransaction.size|default:"" }}';
+    const originalModelChoice = '{{ magwheelTransaction.model|default:"" }}';
+    const originalPCD1Choice = '{{ magwheelTransaction.pcd1|default:"" }}';
+    const originalPCD2Choice = '{{ magwheelTransaction.pcd2|default:"" }}';
+    const originalOffsetChoice = '{{ magwheelTransaction.offset|default:"" }}';
+    const originalBoreChoice = '{{ magwheelTransaction.bore|default:"" }}';
+    const originalColorChoice = '{{ magwheelTransaction.color|default:"" }}';
+
+    // Populate Size based on Brand
+    document.getElementById('brand').addEventListener('change', function () {
+        const brand = this.value;
+        const sizeSelect = document.getElementById('size');
+        sizeSelect.innerHTML = ''; // Clear existing options
+
+        if (brandSizeChoices[brand]) {
+            const sizes = Object.keys(brandSizeChoices[brand]).sort(); // Sort as strings
+
+            // Add a placeholder option
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = '';
+            placeholderOption.disabled = true;
+            sizeSelect.appendChild(placeholderOption);
+
+            // Add valid size options
+            sizes.forEach(function (size) {
+                const option = document.createElement('option');
+                option.value = size;
+                option.textContent = size;
+
+                // Preselect if it's the original choice
+                if (size === originalSizeChoice) {
+                    option.selected = true;
+                }
+
+                sizeSelect.appendChild(option);
+            });
+        }
+
+        // Trigger size change for downstream dropdowns
+        sizeSelect.dispatchEvent(new Event('change'));
+    });
+
+
+    // Populate Model based on Size (Magwheels)
+    document.getElementById('size').addEventListener('change', function () {
+        const brand = document.getElementById('brand').value;
+        const size = this.value;
+        const modelSelect = document.getElementById('model');
+        modelSelect.innerHTML = ''; // Clear existing model options
+
+        if (brandSizeChoices[brand] && brandSizeChoices[brand][size]) {
+            const models = brandSizeChoices[brand][size].sort(); // Alphabetical sort
+
+            // Add a placeholder option
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = '';
+            placeholderOption.disabled = true;
+            placeholderOption.selected = true;
+            modelSelect.appendChild(placeholderOption);
+
+            // Add valid model options
+            models.forEach(function (model) {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+
+                // Preselect if it's the original choice
+                if (model === originalModelChoice) {
+                    option.selected = true;
+                }
+
+                modelSelect.appendChild(option);
+            });
+        }
+
+        // Trigger model change to update dependent fields
+        modelSelect.dispatchEvent(new Event('change'));
+    });
+
+
+    // Populate PCD1 based on Model
+    document.getElementById('model').addEventListener('change', function() {
+        const model = this.value;
+        const size = document.getElementById('size').value;
+        const pcd1Select = document.getElementById('pcd1');
+        pcd1Select.innerHTML = '';  // Clear the existing model options
+
+        if (modelPCD1Choices[model] && modelPCD1Choices[model][size]) {
+            // Add original option as first option, if exists
+            const option = document.createElement('option');
+            option.value = originalPCD1Choice;
+            option.textContent = originalPCD1Choice;
+            pcd1Select.appendChild(option);
+
+            // Get pcd1 and sort them alphabetically
+            const sortedPcd1 = modelPCD1Choices[model][size]
+                .sort();
+
+            // Add all sorted pcd1 options
+            sortedPcd1.forEach(function(pcd1) {
+                // To avoid repeating options
+                if (pcd1 !== originalPCD1Choice) {
+                    const option = document.createElement('option');
+                    option.value = pcd1;
+                    option.textContent = pcd1;
+                    pcd1Select.appendChild(option);
+                }
+            });
+        }
+
+        // Automatically trigger pcd1 change to update pcd2
+        pcd1Select.dispatchEvent(new Event('change'));
+    });
+
+    // Populate PCD1 based on Model
+    document.getElementById('model').addEventListener('change', function () {
+        const model = this.value;
+        const size = document.getElementById('size').value;
+        const pcd1Select = document.getElementById('pcd1');
+        pcd1Select.innerHTML = ''; // Clear existing PCD1 options
+
+        if (modelPCD1Choices[model] && modelPCD1Choices[model][size]) {
+            const pcd1Values = modelPCD1Choices[model][size].sort();
+
+            // Add a placeholder option
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = '';
+            placeholderOption.disabled = true;
+            placeholderOption.selected = true;
+            pcd1Select.appendChild(placeholderOption);
+
+            // Add valid PCD1 options
+            pcd1Values.forEach(function (pcd1) {
+                const option = document.createElement('option');
+                option.value = pcd1;
+                option.textContent = pcd1;
+
+                // Preselect if it's the original choice
+                if (pcd1 === originalPCD1Choice) {
+                    option.selected = true;
+                }
+
+                pcd1Select.appendChild(option);
+            });
+        }
+
+        // Trigger PCD1 change to update dependent dropdown (PCD2)
+        pcd1Select.dispatchEvent(new Event('change'));
+    });
+
+    // Populate PCD2, Offset, Bore based on PCD1
+    document.getElementById('pcd1').addEventListener('change', function () {
+        const model = document.getElementById('model').value;
+        const pcd1 = this.value;
+
+        // Helper to update a select dropdown
+        function updateDropdown(selectId, dataMap, originalChoice) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+
+            if (dataMap[model] && dataMap[model][pcd1]) {
+                const sortedValues = dataMap[model][pcd1].sort();
+
+                // Add placeholder
+                const placeholderOption = document.createElement('option');
+                placeholderOption.value = '';
+                placeholderOption.textContent = '';
+                placeholderOption.disabled = true;
+                placeholderOption.selected = true;
+                select.appendChild(placeholderOption);
+
+                // Add options
+                sortedValues.forEach(function (value) {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+
+                    // Preselect if it matches the original choice
+                    if (value === originalChoice) {
+                        option.selected = true;
+                    }
+
+                    select.appendChild(option);
+                });
+
+                // Trigger change event for cascading updates
+                select.dispatchEvent(new Event('change'));
+            }
+        }
+
+        // Update each dependent dropdown
+        updateDropdown('pcd2', modelPCD2Choices, originalPCD2Choice);
+        updateDropdown('offset', modelOffsetChoices, originalOffsetChoice);
+        updateDropdown('bore', modelBoreChoices, originalBoreChoice);
+        updateDropdown('color', modelColorChoices, originalColorChoice);
+    });
+
+    // Trigger the brand change event to load size options on page load
+    document.getElementById('brand').dispatchEvent(new Event('change'));
+
+</script>
+
+
+{% endblock %}

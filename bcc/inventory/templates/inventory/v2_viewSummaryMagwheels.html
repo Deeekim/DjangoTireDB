@@ -1,0 +1,259 @@
+{% extends 'inventory/base_template.html' %}
+
+{% block content %}
+
+<!-- Action Buttons -->
+<div class="action-buttons">
+    <a href="{% url 'inventory:v2-view-summary-magwheels' %}" class="button-link">View Current Inventory</a>
+    <a href="{% url 'inventory:v2-view-all-magwheels' %}" class="button-link">Edit Magwheel Transaction</a>
+    <a href="{% url 'inventory:v2-query-magwheels' %}" class="button-link">Query Inventory</a>
+</div>
+
+<h2>Search</h2>
+
+<input type="text" class="search-bar" placeholder="Search keywords..." id="search-bar">
+
+<h1>Current Tire Inventory</h1>
+
+<!-- Grouped Inventory Table -->
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th width = "180 px">Date of Recently Added</th>
+            <th width = "80 px">Location</th>
+            <th width = "150 px">Brand</th>
+            <th width = "80 px">Size</th>
+            <th width = "300 px">Model</th>
+            <th width = "100 px">PCD 1</th>
+            <th width = "100 px">PCD 2</th>
+            <th width = "100 px">Offset</th>
+            <th width = "100 px">Bore</th>
+            <th>Color</th>
+            <th width = "80 px">Supplier</th>
+            <th width = "100 px">Total Inventory</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in grouped_inventory %}
+        <tr>
+            <td>{{ item.last_transaction_date }}</td>
+            <td>{{ item.transaction_location }}</td>
+            <td>{{ item.brand }}</td>
+            <td>{{ item.size }}</td>
+            <td>{{ item.model }}</td>
+            <td>{{ item.pcd1 }}</td>
+            <td>{{ item.pcd2 }}</td>
+            <td>{{ item.offset }}</td>
+            <td>{{ item.bore }}</td>
+            <td>{{ item.color }}</td>
+            <td>{{ item.supplier }}</td>
+            <td>{{ item.total_inventory }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Save and Print Buttons -->
+<div class="fixed-buttons">
+    <button id="save-button" class="action-button">Save as CSV File</button>
+    <button id="print-button" class="action-button">Print Current Inventory</button>
+</div>
+
+<!-- No results message -->
+{% if not grouped_inventory %}
+<p>No inventory data found.</p>
+{% endif %}
+
+<style>
+    nav {
+        background-color: #9400D3;
+        color: white;
+        padding: 10px 0;
+        text-align: center;
+    }
+    nav a {
+        color: white;
+        margin: 0 15px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    th {
+        background-color: #9400D3;
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    .button-link {
+        font-size: 16px;
+        background-color: #9400D3;
+        color: white;
+        border: none;
+        text-decoration: none;
+        text-align: center;
+        display: inline-block;
+        cursor: pointer;
+        border-radius: 5px;
+        text-decoration: None;
+    }
+    .button-link:hover {
+        background-color: #600189;
+    }
+    .edit-btn {
+        display: inline-block;
+        padding: 8px 24px;
+        font-size: 14px;
+        color: white;
+        background-color: #28a745;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+        text-decoration: None;
+    }
+
+    .edit-btn:hover {
+        background-color: #218838;
+    }
+
+    .delete-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        font-size: 14px;
+        color: white;
+        background-color: #fd0000;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+        text-decoration: None;
+    }
+
+    .delete-btn:hover {
+        background-color: #b50202;
+    }
+
+    /* Container for fixed buttons */
+    .fixed-buttons {
+        position: fixed;
+        bottom: 20px; /* Distance from the bottom of the page */
+        right: 20px; /* Distance from the right edge of the page */
+        display: flex;
+        flex-direction: row; /* Arrange buttons vertically */
+        gap: 10px; /* Space between buttons */
+    }
+
+    /* Style for buttons */
+    .action-button {
+        padding: 10px 20px;
+        font-size: 14px;
+        background-color: #9400D3;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-align: center;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Optional shadow */
+        transition: background-color 0.3s ease;
+    }
+
+    /* Hover effect for buttons */
+    .action-button:hover {
+        background-color: #600189;
+    }
+</style>
+
+<script>
+    // JavaScript for search functionality
+    document.getElementById('search-bar').addEventListener('input', function(event) {
+        let searchQuery = event.target.value.toLowerCase();
+        let rows = document.querySelectorAll('table tbody tr');
+        rows.forEach(function(row) {
+            let cells = row.querySelectorAll('td');
+            let match = false;
+            cells.forEach(function(cell) {
+                if (cell.textContent.toLowerCase().includes(searchQuery)) {
+                    match = true;
+                }
+            });
+            row.style.display = match ? '' : 'none';
+        });
+    });
+
+    // Save as CSV file
+    document.getElementById('save-button').addEventListener('click', function() {
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date();
+        const formattedDate = today.toISOString().slice(0, 10); // YYYY-MM-DD
+
+        // Set the file name dynamically
+        const fileName = `${formattedDate}-tires-summary.csv`;
+
+        // Prepare the CSV content
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Last Transaction Date,Location,Brand,Size,Model,PCD1,PCD2,Offset,Bore,Color,Supplier,Total Inventory\n"; // Header row
+
+        // Loop through each row of the table
+        const rows = document.querySelectorAll('table tbody tr');
+        rows.forEach(row => {
+            const rowData = Array.from(row.querySelectorAll('td')).map(cell => `"${cell.textContent}"`);
+            csvContent += rowData.join(",") + "\n";
+        });
+
+        // Encode and create a downloadable link
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link); // Append link to the document
+        link.click(); // Trigger the download
+        document.body.removeChild(link); // Remove the link after downloading
+    });
+
+    // Print Table
+    document.getElementById('print-button').addEventListener('click', function() {
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date();
+        const formattedDate = today.toISOString().slice(0, 10); // YYYY-MM-DD
+
+        // Prepare the content for printing
+        const printWindow = window.open('', '_blank');
+        printWindow.document.open();
+
+        // Add title and date to the printed content
+        const title = `<h1>Tires Summary - ${formattedDate}</h1>`;
+        const table = document.querySelector('table').outerHTML;
+
+        // Style the print page
+        const styles = `
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; font-size: 10px; }
+                table { width: 100%; border-collapse: collapse; font-size: 9px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #9400D3; color: white; font-size: 10px; }
+                h1 { text-align: center; margin-bottom: 20px; font-size: 14px; }
+            </style>
+        `;
+
+        // Write the content to the new window
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>${formattedDate}-tires-summary</title>
+                ${styles}
+            </head>
+            <body>
+                ${title}
+                ${table}
+            </body>
+            </html>
+        `);
+
+        // Close the document and trigger the print
+        printWindow.document.close();
+        printWindow.print();
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,306 @@
+{% extends 'inventory/base_template.html' %}
+
+{% block content %}
+
+<!-- Action Buttons -->
+<div class="action-buttons">
+    <a href="{% url 'inventory:v2-view-summary-tires' %}" class="button-link">View Current Inventory</a>
+    <a href="{% url 'inventory:v2-view-all-tires' %}" class="button-link">Edit Tire Transaction</a>
+    <a href="{% url 'inventory:v2-query-tires' %}" class="button-link">Query Inventory</a>
+</div>
+
+<!-- Custom CSS to adjust text size and input size, and make the form two-row layout -->
+<style>
+    /* Adjust the font size for labels, inputs, and buttons */
+    .form-label {
+        font-size: 1.1rem; /* Slightly smaller */
+        font-weight: bold;
+    }
+
+    .form-control {
+        font-size: 1rem; /* Slightly smaller font size for inputs */
+        padding: 5px;
+        height: 24px; /* Slightly smaller input height */
+    }
+
+    .btn {
+        font-size: 1.1rem; /* Slightly smaller button text */
+        padding: 10px 18px;
+        margin: 0px;
+    }
+
+    /* Button Colors */
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+        color: white;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+        color: white;
+    }
+
+    /* Optional: Make form labels and inputs more spaced */
+    .row.g-3 {
+        margin-bottom: 20px;
+    }
+
+    .col-md-4 {
+        margin-bottom: 15px;
+    }
+
+    /* Ensure three columns per row (Bootstrap grid system) */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .col-md-4 {
+        flex: 1 0 32%;  /* 3 columns, each taking up ~32% width */
+        margin-right: 2%;  /* Add spacing between columns */
+    }
+
+    .col-md-4:nth-child(3n) {
+        margin-right: 0;  /* Remove the margin for every third column */
+    }
+
+    .col-md-12 {
+        margin-top: 15px;
+    }
+
+    /* Additional padding around form fields for spacing */
+    .form-control, .btn {
+        margin-top: 8px;
+    }
+</style>
+
+<h1>Transaction Query</h1>
+
+<!-- Filter Form -->
+<form method="get" id="filterForm" class="row g-3">
+    <div class="col-md-6">
+        <label for="start_date" class="form-label">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" class="form-control" value="{{ filters.start_date|default:'' }}">
+    </div>
+
+    <div class="col-md-6">
+        <label for="end_date" class="form-label">End Date:</label>
+        <input type="date" id="end_date" name="end_date" class="form-control" value="{{ filters.end_date|default:'' }}">
+    </div>
+
+    <div class="col-md-6">
+        <label for="location" class="form-label">Location</label>
+        <input type="text" id="location" name="location" class="form-control" value="{{ filters.location|default:'' }}">
+    </div>
+
+    <div class="col-md-6">
+        <label for="transaction type" class="form-label">Transaction Type</label>
+        <input type="text" id="transaction_type" name="transaction_type" class="form-control" value="{{ filters.transaction_type|default:'' }}">
+    </div>
+
+    <div class="col-md-6">
+        <label for="brand" class="form-label">Brand:</label>
+        <input type="text" id="brand" name="brand" class="form-control" value="{{ filters.brand|default:'' }}">
+    </div>
+
+    <div class="col-md-6">
+        <label for="size" class="form-label">Size:</label>
+        <input type="text" id="size" name="size" class="form-control" value="{{ filters.size|default:'' }}">
+    </div>
+
+    <div class="col-md-6">
+        <label for="model" class="form-label">Model:</label>
+        <input type="text" id="model" name="model" class="form-control" value="{{ filters.model|default:'' }}">
+    </div>
+
+    <div class="col-md-6">
+        <label for="specs" class="form-label">Specs:</label>
+        <input type="text" id="specs" name="specs" class="form-control" value="{{ filters.specs|default:'' }}">
+    </div>
+
+    <div class="col-md-6">
+        <label for="supplier" class="form-label">Supplier:</label>
+        <input type="text" id="supplier" name="supplier" class="form-control" value="{{ filters.supplier|default:'' }}">
+    </div>
+
+    <div class="col-md-12 text-center">
+        <button type="submit" class="btn btn-primary">Search</button>
+        <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
+    </div>
+</form>
+
+<!-- Transactions Table -->
+<div class="table-container">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th width = "80 px">Invoice Number</th>
+                <th width = "120 px">Date</th>
+                <th width = "80 px">Location</th>
+                <th width = "100 px">Transaction Type</th>
+                <th width = "30 px">Qty</th>
+                <th width = "180 px">Brand</th>
+                <th width = "40 px">Size</th>
+                <th>Model</th>
+                <th width = "150 px">Specs</th>
+                <th width = "90 px">Load</th>
+                <th width = "65 px">Supplier</th>
+                <th width = "75 px">(Cumu.) Inventory</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in tires %}
+            <tr>
+                <td>{{ item.tire.transaction.invoice_number }}</td>
+                <td>{{ item.tire.transaction.date }}</td>
+                <td>{{ item.tire.transaction.location }}</td>
+                <td>{{ item.tire.transaction.transaction_type }}</td>
+                <td>{{ item.tire.qty }}</td>
+                <td>{{ item.tire.brand }}</td>
+                <td>{{ item.tire.size }}</td>
+                <td>{{ item.tire.model }}</td>
+                <td>{{ item.tire.specs }}</td>
+                <td>{{ item.tire.load }}</td>
+                <td>{{ item.tire.supplier }}</td>
+                <td>{{ item.inventory_qty }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Save and Print Buttons -->
+<div class="fixed-buttons">
+    <button id="save-button" class="action-button">Save as CSV File</button>
+    <button id="print-button" class="action-button">Print Current Inventory</button>
+</div>
+
+<!-- No results message -->
+{% if not tires %}
+<p>No transactions found.</p>
+{% endif %}
+
+<script>
+    // JavaScript function to clear the form inputs
+    function clearForm() {
+        const form = document.getElementById('filterForm');
+        form.reset(); // Reset all fields to their default state (empty)
+        Array.from(form.elements).forEach(element => {
+            if (element.type === 'text' || element.type === 'date') {
+                element.value = ''; // Clear text and date inputs
+            }
+        });
+    }
+
+    // Save as CSV file
+    document.getElementById('save-button').addEventListener('click', function() {
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date();
+        const formattedDate = today.toISOString().slice(0, 10); // YYYY-MM-DD
+
+        // Set the file name dynamically
+        const fileName = `${formattedDate}-tires-query.csv`;
+
+        // Prepare the CSV content
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Invoice Number,Date,Location,Transaction Type,Qty,Brand,Size,Model,Specs,Load,Supplier,Inventory\n"; // Header row
+
+        // Loop through each row of the table
+        const rows = document.querySelectorAll('table tbody tr');
+        rows.forEach(row => {
+            const rowData = Array.from(row.querySelectorAll('td')).map(cell => `"${cell.textContent}"`);
+            csvContent += rowData.join(",") + "\n";
+        });
+
+        // Encode and create a downloadable link
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link); // Append link to the document
+        link.click(); // Trigger the download
+        document.body.removeChild(link); // Remove the link after downloading
+    });
+
+    // Print Table
+    document.getElementById('print-button').addEventListener('click', function() {
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date();
+        const formattedDate = today.toISOString().slice(0, 10); // YYYY-MM-DD
+
+        // Prepare the content for printing
+        const printWindow = window.open('', '_blank');
+        printWindow.document.open();
+
+        // Add title and date to the printed content
+        const title = `<h1>Tire Transactions - ${formattedDate}</h1>`;
+        const table = document.querySelector('table').outerHTML;
+
+        // Style the print page
+        const styles = `
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; font-size: 10px; }
+                table { width: 100%; border-collapse: collapse; font-size: 9px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #9400D3; color: white; font-size: 10px; }
+                h1 { text-align: center; margin-bottom: 20px; font-size: 14px; }
+            </style>
+        `;
+
+        // Write the content to the new window
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>${formattedDate}-tires-query</title>
+                ${styles}
+            </head>
+            <body>
+                ${title}
+                ${table}
+            </body>
+            </html>
+        `);
+
+        // Close the document and trigger the print
+        printWindow.document.close();
+        printWindow.print();
+    });
+</script>
+
+<style>
+    /* Container for fixed buttons */
+    .fixed-buttons {
+        position: fixed;
+        bottom: 20px; /* Distance from the bottom of the page */
+        right: 20px; /* Distance from the right edge of the page */
+        display: flex;
+        flex-direction: row; /* Arrange buttons vertically */
+        gap: 10px; /* Space between buttons */
+    }
+
+    /* Style for buttons */
+    .action-button {
+        padding: 10px 20px;
+        font-size: 14px;
+        background-color: #007bff; /* Button color */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-align: center;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Optional shadow */
+        transition: background-color 0.3s ease;
+    }
+
+    /* Hover effect for buttons */
+    .action-button:hover {
+        background-color: #0056b3; /* Darker shade for hover */
+    }
+</style>
+
+{% endblock %}

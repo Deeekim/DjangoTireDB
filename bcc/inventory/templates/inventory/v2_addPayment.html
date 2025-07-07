@@ -1,0 +1,194 @@
+{% extends 'inventory/base_template.html' %}
+{% load static %}
+
+{% block content %}
+<form method="POST" novalidate class="transaction-form">
+    {% csrf_token %}
+
+    <h2>{{ edit_mode|yesno:"Edit Payment,Add Payment" }}</h2>
+
+    {% if form.non_field_errors %}
+        <div class="form-errors">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <div class="form-group">
+        {{ form.method.label_tag }}
+        {{ form.method }}
+    </div>
+
+    <div class="form-group" id="credit_card_type_field" style="display: none;">
+        <label for="{{ form.credit_card_type.id_for_label }}">Bank (for Credit Card)</label>
+        {{ form.credit_card_type }}
+    </div>
+
+    <div class="form-group" id="debit_card_bank_field" style="display: none;">
+        <label for="{{ form.debit_card_bank.id_for_label }}">Bank (for Debit Card)</label>
+        {{ form.debit_card_bank }}
+    </div>
+
+    <div class="form-group" id="cheque_on_date_field" style="display: none;">
+        <label for="{{ form.cheque_on_date.id_for_label }}">Cheque Date</label>
+        {{ form.cheque_on_date }}
+    </div>
+
+
+    <div class="form-group">
+        {{ form.amount.label_tag }}
+        {{ form.amount }}
+    </div>
+
+    <div class="form-group">
+        {{ form.status.label_tag }}
+        {{ form.status }}
+    </div>
+
+    <div class="form-group">
+        {{ form.notes.label_tag }}
+        {{ form.notes }}
+    </div>
+
+    <button type="submit" class="submit-btn">Save Payment</button>
+    <a href="{% url 'inventory:v2-create-transaction' %}" class="cancel-btn" style="text-align: center; display: block;">Cancel</a>
+</form>
+
+
+<style>
+    .transaction-form {
+        max-width: 720px;
+        margin: 30px auto;
+        padding: 24px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        box-sizing: border-box;
+        border: 1px solid #e0e0e0;
+    }
+
+    .form-group input[type="checkbox"],
+    .form-group input[type="radio"] {
+        transform: scale(2.4) translateX(2px);
+        transform-origin: left center;
+        width: 10px;
+        height: 20px;
+        accent-color: #3f88f0;
+        cursor: pointer;
+    }
+
+    .form-group {
+        margin-bottom: 18px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #333;
+        font-size: 16px;
+    }
+
+    .form-group input,
+    .form-group select {
+        background-color: #f9f9f9;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 16px;
+        padding: 12px 14px;
+        height: 52px;
+        border: 1px solid #cdd3d8;
+        border-radius: 6px;
+        transition: all 0.25s ease-in-out;
+        box-sizing: border-box;
+    }
+
+    .form-group textarea {
+        background-color: #f9f9f9;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 16px; /* <-- bump up font size here */
+        padding: 12px 14px;
+        height: auto;
+        border: 1px solid #cdd3d8;
+        border-radius: 6px;
+        transition: all 0.25s ease-in-out;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #3f88f0;
+        background-color: #f0f7ff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(63, 136, 240, 0.2);
+    }
+
+    .form-group select {
+        background-color: #f9f9f9;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .submit-btn {
+        background-color: #3f88f0;
+        color: #fff;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+        transition: background-color 0.3s ease;
+    }
+
+    .submit-btn:hover {
+        background-color: #296fda;
+    }
+
+    .cancel-btn {
+        background-color: #e74c3c;
+        color: #fff;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 92.5%;
+        margin-top: 14px;
+        transition: background-color 0.3s ease;
+        text-decoration: None;
+    }
+
+    .cancel-btn:hover {
+        background-color: #c0392b;
+    }
+</style>
+
+
+<script>
+    function updateConditionalFields() {
+        const method = document.getElementById('id_method').value;
+
+        const creditField = document.getElementById('credit_card_type_field');
+        const debitField = document.getElementById('debit_card_bank_field');
+        const chequeField = document.getElementById('cheque_on_date_field');
+
+        creditField.style.display = 'none';
+        debitField.style.display = 'none';
+        chequeField.style.display = 'none';
+
+        if (method === 'Credit Card') {
+            creditField.style.display = 'block';
+        } else if (method === 'Debit Card') {
+            debitField.style.display = 'block';
+        } else if (method === 'Cheque') {
+            chequeField.style.display = 'block';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        updateConditionalFields();
+        document.getElementById('id_method').addEventListener('change', updateConditionalFields);
+    });
+</script>
+{% endblock %}

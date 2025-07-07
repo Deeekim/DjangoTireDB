@@ -1,0 +1,131 @@
+{% extends 'inventory/base_template.html' %}
+
+{% block content %}
+
+<h2>All Transactions</h2>
+
+<input type="text" class="search-bar" placeholder="Search keywords..." id="search-bar" style="width: 85%;"> <a href="{% url 'inventory:v2-create-transaction' %}" class="action-button"> ➕ Create New Transaction </a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Invoice #</th>
+            <th>Sold To</th>
+            <th>Date</th>
+            <th>Salesperson</th>
+            <th>Location</th>
+            <th>Inventory</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for txn in transactions %}
+        <tr>
+            <td>{{ txn.invoice_number }}</td>
+            <td>{{ txn.sold_to }}</td>
+            <td>{{ txn.date }}</td>
+            <td>{{ txn.salesperson }}</td>
+            <td>{{ txn.get_location_display }}</td>
+            <td>{{ txn.get_transaction_type_display }}</td>
+            <td>
+                <a href="{% url 'inventory:v2-expand-transaction' txn.pk %}" class="view-btn">View</a>
+                <a href="{% url 'inventory:v2-edit-transaction' txn.pk %}" class="edit-btn">Edit</a>
+                <a href="{% url 'inventory:v2-delete-transaction' txn.pk %}" class="delete-btn">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">No transactions yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<style>
+    .view-btn {
+        display: inline-block;
+        padding: 8px 24px;
+        font-size: 14px;
+        color: white;
+        background-color: #007bff;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+        text-decoration: None;
+    }
+
+    .view-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .edit-btn {
+        display: inline-block;
+        padding: 8px 24px;
+        font-size: 14px;
+        color: white;
+        background-color: #28a745;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+        text-decoration: None;
+    }
+
+    .edit-btn:hover {
+        background-color: #218838;
+    }
+
+    .delete-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        font-size: 14px;
+        color: white;
+        background-color: #fd0000;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+        text-decoration: None;
+    }
+
+    .delete-btn:hover {
+        background-color: #b50202;
+    }
+
+    .action-button {
+        display: inline-block;
+        width: 13.5%;
+        padding: 8px 0px;
+        font-size: 14px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        text-align: center;
+        transition: background-color 0.3s ease;
+        margin-bottom: 10px;
+        text-decoration: None;
+    }
+
+    .action-button:hover {
+        background-color: #218838;
+    }
+</style>
+
+<script>
+    // JavaScript for search functionality
+    document.getElementById('search-bar').addEventListener('input', function(event) {
+        let searchQuery = event.target.value.toLowerCase();
+        let rows = document.querySelectorAll('table tbody tr');
+        rows.forEach(function(row) {
+            let cells = row.querySelectorAll('td');
+            let match = false;
+            cells.forEach(function(cell) {
+                if (cell.textContent.toLowerCase().includes(searchQuery)) {
+                    match = true;
+                }
+            });
+            row.style.display = match ? '' : 'none';
+        });
+    });
+</script>
+
+{% endblock %}
+

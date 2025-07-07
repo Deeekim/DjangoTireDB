@@ -1,0 +1,283 @@
+{% extends 'inventory/base_template.html' %}
+
+{% block content %}
+
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+    
+    <div style="background-color: #f9f9f9; padding: 30px 120px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-width: 1200px; margin: 0 auto 40px auto;">
+
+        <h1 style="margin-bottom: 40px; font-size: 28px;">Transaction Details</h1>
+
+        <div style="display: grid; grid-template-columns: 200px 1fr; row-gap: 12px; font-size: 18px;">
+            <div><strong>Invoice #:</strong></div>
+            <div>{{ transaction.invoice_number }}</div>
+
+            <div><strong>Sold To:</strong></div>
+            <div>{{ transaction.sold_to }}</div>
+
+            <div><strong>Date:</strong></div>
+            <div>{{ transaction.date }}</div>
+
+            <div><strong>Salesperson:</strong></div>
+            <div>{{ transaction.salesperson }}</div>
+
+            <div><strong>Location:</strong></div>
+            <div>{{ transaction.get_location_display }}</div>
+
+            <div><strong>Inventory Movement:</strong></div>
+            <div>{{ transaction.get_transaction_type_display }}</div>
+
+            <div><strong>With Service(?):</strong></div>
+            <div>{{ transaction.service }}</div>
+
+            <div><strong>Total Transaction Amount:</strong></div>
+            <div>{{ transaction.amount }}</div>
+
+            <div><strong>Notes:</strong></div>
+            <div>{{ transaction.notes }}</div>
+        </div>
+    </div>
+
+
+    <!-- RIGHT: Payment Methods Panel -->
+    <div style="
+        width: 60%;
+        background: rgb(248, 248, 248);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    ">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 5px 0px;">Payment Methods</h2>
+        </div>
+
+        {% if payments %}
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+                {% for payment in payments %}
+                {{ payment.method }}
+                    <li style="
+                        background: #f1f1f1;
+                        border-radius: 8px;
+                        padding: 12px 16px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+                    ">
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>
+                                <strong>
+                                    {% if payment.method == "Credit Card" %}
+                                    Credit Card ({{ payment.credit_card_type }})
+                                    {% elif payment.method == "Debit Card" %}
+                                    Debit Card ({{ payment.debit_card_bank }})
+                                    {% elif payment.method == "Cheque" %}
+                                    Cheque (On date: {{ payment.cheque_on_date }})
+                                    {% else %}
+                                    {{ payment.method }}
+                                    {% endif %}
+                                </strong>
+                                – ₱{{ payment.amount }}
+                            </div>
+                            <div>
+                                <a href="{% url 'inventory:v2-edit-saved-payment' transaction.id payment.id %}" class="action-btn edit-btn">Edit</a>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.9em;">
+                            {% if payment.status %}
+                                <span style="color: green;">✔ Payment Received</span>
+                            {% else %}
+                                <span style="color: #999;">Pending</span>
+                            {% endif %}
+                        </div>
+                        {% if payment.notes %}
+                            <div style="font-size: 0.85em; color: #555;">{{ payment.notes }}</div>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p style="color: #777;">No payment methods added yet.</p>
+        {% endif %}
+    </div>
+
+
+</div>
+
+
+<hr>
+
+
+<h2>Tires</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Qty</th><th>Brand</th><th>Size</th><th>Model</th><th>Specs</th><th>Load</th><th>Remarks</th><th>Supplier</th><th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tire in tires %}
+        <tr>
+            <td>{{ tire.qty }}</td><td>{{ tire.brand }}</td><td>{{ tire.size }}</td><td>{{ tire.model }}</td><td>{{ tire.specs }}</td>
+            <td>{{ tire.load }}</td><td>{{ tire.remarks }}</td><td>{{ tire.get_supplier_display }}</td><td>{{ tire.notes }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9">No tires recorded.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Magwheels</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Qty</th><th>Brand</th><th>Size</th><th>Model</th><th>PCD1</th><th>PCD2</th><th>Offset</th><th>Bore</th><th>Color</th><th>Supplier</th><th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mag in magwheels %}
+        <tr>
+            <td>{{ mag.qty }}</td><td>{{ mag.brand }}</td><td>{{ mag.size }}</td><td>{{ mag.model }}</td><td>{{ mag.pcd1 }}</td>
+            <td>{{ mag.pcd2 }}</td><td>{{ mag.offset }}</td><td>{{ mag.bore }}</td><td>{{ mag.color }}</td><td>{{ mag.get_supplier_display }}</td><td>{{ mag.notes }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="11">No magwheels recorded.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<div style="text-align: center;">
+    <a href="{% url 'inventory:v2-edit-transaction' transaction.pk %}" class="submit-btn">Edit Transaction</a>
+    <a href="{% url 'inventory:v2-view-all-transactions' %}" class="cancel-btn">Return</a>
+</div>
+
+<style>
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+        padding: 8px; /* Increased padding for taller input/select boxes */
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        transition: border-color 0.3s ease, background-color 0.3s ease;
+        width: 100%; /* Ensure fields fit within the container */
+        box-sizing: border-box; /* Ensure padding and borders don't extend the width */
+    }
+
+    /* Styling for input fields */
+    .form-group input[type="number"], 
+    .form-group input[type="text"], 
+    .form-group input[type="datetime-local"] {
+        background-color: #ffffff; /* White background for text inputs */
+    }
+
+    /* Styling for select boxes */
+    .form-group select {
+        background-color: #f2f2f2; /* Light grey background for select boxes */
+        border: 1px solid #aaa; /* Slightly darker border for select */
+        color: #333; /* Dark text color for contrast */
+        font-family: 'Arial', sans-serif; /* Font change for differentiation */
+        height: 36px; /* Set height to make select box taller */
+    }
+
+    .form-group select:focus {
+        border-color: #007bff; /* Highlight border on focus */
+        background-color: #e0f7ff; /* Light blue background when focused */
+    }
+
+    .form-group input[type="text"]:focus, 
+    .form-group input[type="number"]:focus, 
+    .form-group input[type="datetime-local"]:focus {
+        border-color: #007bff; /* Highlight border on focus for text inputs */
+        background-color: #f0f8ff; /* Light blue background for text inputs */
+    }
+
+    .submit-btn {
+        display:inline-block;
+        background-color: #007bff;
+        color: white;
+        padding: 12px 16px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 20%;
+        margin-top: 40px;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .submit-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .cancel-btn {
+        display:inline-block;
+        background-color: #fd0000;
+        color: #ffffff;
+        padding: 12px 16px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 20%;
+        margin-top: 40px;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .cancel-btn:hover {
+        background-color: #b50202;
+    }
+
+    .payment-action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-left: 80px;
+        justify-content: flex-start; /* Aligns buttons to the left */
+        flex-wrap: wrap; /* Ensures they wrap properly on smaller screens */
+    }
+
+
+    .action-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 300;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background-color 0.3s ease;
+    }
+
+    .edit-btn {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .edit-btn:hover {
+        background-color: #218838;
+    }
+
+    .delete-btn {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .delete-btn:hover {
+        background-color: #a71d2a;
+    }
+
+</style>
+
+{% endblock %}
+

@@ -1,0 +1,181 @@
+{% extends 'inventory/base_template.html' %}
+
+{% block content %}
+
+
+
+<div class="container">
+    <form method="POST" class="transaction-form">
+        {% csrf_token %}
+
+        <h1>Edit Transaction Details</h1>
+
+        <div class="form-group">
+            <label for="invoice_number">Invoice Number:<span style="color: red;">**</span></label>
+            <input type="number" name="invoice_number" id="invoice_number" value="{{ form.invoice_number.value }}">
+        </div>
+
+        <div class="form-group">
+            <label for="sold_to">Sold To:</label>
+            <input type="text" name="sold_to" id="sold_to" value="{{ form.sold_to.value|default:'' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="date">Date:<span style="color: red;">**</span></label>
+            <input type="date" name="date" id="date" value="{{ form.date.value|date:"Y-m-d" }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="salesperson">Salesperson:</label>
+            <input type="text" name="salesperson" id="salesperson" value="{{ form.salesperson.value|default:'' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="location">Location:<span style="color: red;">**</span></label>
+            <select name="location" id="location" required>
+                <option value="" {% if not form.initial.location %}selected{% endif %}></option>
+                {% for location_value, location_display in form.fields.location.choices %}
+                    {% if location_value %}
+                        <option value="{{ location_value }}" {% if form.initial.location == location_value %}selected{% endif %}>
+                            {{ location_display }}
+                        </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="transaction_type">Transaction Type:<span style="color: red;">**</span></label>
+            <select name="transaction_type" id="transaction_type" required>
+                <option value="" {% if not form.initial.location %}selected{% endif %}></option>
+                {% for transaction_value, transaction_display in form.fields.transaction_type.choices %}
+                    {% if transaction_value %}
+                        <option value="{{ transaction_value }}" {% if form.initial.transaction_type == transaction_value %}selected{% endif %}>
+                            {{ transaction_display }}
+                        </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="service">With Services(s):</label>
+            <input type="checkbox" name="service" id="service" {% if form.service.value %}checked{% endif %}>
+        </div>
+
+        <div class="form-group">
+            <label for="notes">Notes:</label>
+            <input type="text" name="notes" id="notes" value="{{ form.notes.value|default:'' }}">
+        </div>
+
+
+        <button type="submit" class="submit-btn">Save Changes</button><a href="{% url 'inventory:v2-expand-transaction' transaction.pk %}" class="cancel-btn">Cancel</a>
+    </form>
+</div>
+
+<style>
+    .transaction-form {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box; /* Ensure all padding and borders are included in width/height */
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+        padding: 12px; /* Increased padding for taller input/select boxes */
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        transition: border-color 0.3s ease, background-color 0.3s ease;
+        width: 100%; /* Ensure fields fit within the container */
+        box-sizing: border-box; /* Ensure padding and borders don't extend the width */
+    }
+
+    /* Styling for input fields */
+    .form-group input[type="number"], 
+    .form-group input[type="text"], 
+    .form-group input[type="datetime-local"] {
+        background-color: #ffffff; /* White background for text inputs */
+    }
+
+    /* Styling for select boxes */
+    .form-group select {
+        background-color: #f2f2f2; /* Light grey background for select boxes */
+        border: 1px solid #aaa; /* Slightly darker border for select */
+        color: #333; /* Dark text color for contrast */
+        font-family: 'Arial', sans-serif; /* Font change for differentiation */
+        height: 48px; /* Set height to make select box taller */
+    }
+
+    .form-group select:focus {
+        border-color: #007bff; /* Highlight border on focus */
+        background-color: #e0f7ff; /* Light blue background when focused */
+    }
+
+    .form-group input[type="text"]:focus, 
+    .form-group input[type="number"]:focus, 
+    .form-group input[type="datetime-local"]:focus {
+        border-color: #007bff; /* Highlight border on focus for text inputs */
+        background-color: #f0f8ff; /* Light blue background for text inputs */
+    }
+
+    .form-group input[type="checkbox"],
+    .form-group input[type="radio"] {
+        transform: scale(2.4) translateX(2px);
+        transform-origin: left center;
+        width: 10px;
+        height: 30px;
+        accent-color: #3f88f0;
+        cursor: pointer;
+    }
+
+    .submit-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 15px 32px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 49%;
+        margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+        background-color: #0056b3;
+    }
+
+    .cancel-btn {
+        background-color: #fd0000;
+        color: #ffffff;
+        padding: 15px 32px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 49%;
+        margin-top: 20px;
+        text-decoration: None;
+    }
+
+    .cancel-btn:hover {
+        background-color: #b50202;
+    }
+
+</style>
+
+{% endblock %}
