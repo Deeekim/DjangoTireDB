@@ -4,7 +4,7 @@ gspread
 openpyxl
 dotenv
 python-decouple
-univcorn[standard]
+uvicorn[standard]
 channels
 channels_redis
 whitenoise
