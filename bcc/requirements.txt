@@ -3,3 +3,4 @@ django
 gspread
 openpyxl
 dotenv
+python-decouple
