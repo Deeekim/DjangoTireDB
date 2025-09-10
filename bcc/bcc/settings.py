@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from inventory.services import initialize_gspread
+from decouple import config
 
 load_dotenv()
 
@@ -27,9 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-^+vh2kgm=f7cumb&)c^bbyw#(6tt-s#^mcj%@n_rq3u*@ess@*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="").split(",")
 
 
 # Application definition
