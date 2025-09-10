@@ -4,3 +4,9 @@ gspread
 openpyxl
 dotenv
 python-decouple
+univcorn[standard]
+channels
+channels_redis
+whitenoise
+dj-database-url
+psycopg2-binary
