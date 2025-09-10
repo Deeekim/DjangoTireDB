@@ -14,6 +14,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from inventory.services import initialize_gspread
 from decouple import config
+import dj_database_url
 
 load_dotenv()
 
@@ -25,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^+vh2kgm=f7cumb&)c^bbyw#(6tt-s#^mcj%@n_rq3u*@ess@*'
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'inventory.apps.InventoryConfig',
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -53,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'bcc.urls'
@@ -74,7 +77,22 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'bcc.wsgi.application'
+ASGI_APPLICATION = 'bcc.asgi.application'
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"  # OK for dev, no Redis yet
+    },
+}
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [os.environ.get("REDIS_URL", "redis://localhost:6379")]
+#         },
+#     }
+# }
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -84,8 +102,10 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+    # 'default': {
+    #     dj_database_url.parse(config("DATABASE_URL"), conn_max_age=600, ssl_require=True)
+    # }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
