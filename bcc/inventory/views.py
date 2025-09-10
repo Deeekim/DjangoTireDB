@@ -22,6 +22,7 @@ from django.urls import reverse
 
 from datetime import date
 
+@login_required
 def home(request):
     return render(request, 'inventory/base_template.html')
 
@@ -35,12 +36,12 @@ def home(request):
 ########################################################################################################################
 ########################################################################################################################
 
-
+@login_required
 def viewAllTires(request):
     tireTransactions = Tire.objects.all()
     context = { 'tireTransactions': tireTransactions[::-1] }
     return render(request, 'inventory/tireTransaction_viewAll.html', context)
-
+@login_required
 def viewSummaryTires(request):
     tires = Tire.objects.all()
 
@@ -68,7 +69,7 @@ def viewSummaryTires(request):
     }
 
     return render(request, 'inventory/tireTransaction_viewSummary.html', context)
- 
+@login_required
 def queryTireTransaction(request):
     # Start with all transactions
     tires = Tire.objects.all()
@@ -150,7 +151,7 @@ def queryTireTransaction(request):
     }
 
     return render(request, 'inventory/tireTransaction_queryTransaction.html', context)
-
+@login_required
 def createTireTransaction(request):
     # Determine if the request is part of a Full Transaction workflow
     is_full_transaction = request.GET.get('full_transaction',  'false').lower() == 'true'
@@ -212,7 +213,7 @@ def createTireTransaction(request):
         'specs_remarks_choices': json.dumps(TIRES_SPECS_REMARKS_CHOICES),
     }
     return render(request, 'inventory/tireTransaction_form.html', context)
-    
+@login_required  
 def editTireTransaction(request, pk):
     # Get transaction for editing
     tireTransaction = Tire.objects.get(id=pk)
@@ -246,7 +247,7 @@ def editTireTransaction(request, pk):
         'specs_remarks_choices': json.dumps(TIRES_SPECS_REMARKS_CHOICES),
     }
     return render(request, 'inventory/tireTransaction_form.html', context)
-
+@login_required
 def deleteTireTransaction(request, pk):
     tireTransaction = Tire.objects.get(id=pk)
     if request.method == "GET":
@@ -261,12 +262,12 @@ def deleteTireTransaction(request, pk):
 ########################################################################################################################
 ########################################################################################################################
 
-
+@login_required
 def viewAllMagwheels(request):
     magwheelTransactions = Magwheel.objects.all()
     context = { 'magwheelTransactions': magwheelTransactions[::-1] }
     return render(request, 'inventory/magwheelTransaction_viewAll.html', context)
-
+@login_required
 def viewSummaryMagwheels(request):
     magwheels = Magwheel.objects.all()
 
@@ -294,7 +295,7 @@ def viewSummaryMagwheels(request):
     }
 
     return render(request, 'inventory/magwheelTransaction_viewSummary.html', context)
-
+@login_required
 def queryMagwheelTransaction(request):
     # Start with all transactions
     magwheels = Magwheel.objects.all()
@@ -385,7 +386,7 @@ def queryMagwheelTransaction(request):
     }
 
     return render(request, 'inventory/magwheelTransaction_queryTransaction.html', context)
-
+@login_required
 def createMagwheelTransaction(request):
     # Determine if the request is part of a Full Transaction workflow
     is_full_transaction = request.GET.get('full_transaction',  'false').lower() == 'true'
@@ -447,7 +448,7 @@ def createMagwheelTransaction(request):
         'model_color_choices': json.dumps(MAGWHEELS_MODEL_COLOR_CHOICES),
     }
     return render(request, 'inventory/magwheelTransaction_form.html', context)
-
+@login_required
 def editMagwheelTransaction(request, pk):
     # Get transaction for editing
     magwheelTransaction = Magwheel.objects.get(id=pk)
@@ -485,7 +486,7 @@ def editMagwheelTransaction(request, pk):
         'model_color_choices': json.dumps(MAGWHEELS_MODEL_COLOR_CHOICES),
     }
     return render(request, 'inventory/magwheelTransaction_form.html', context)
-
+@login_required
 def deleteMagwheelTransaction(request, pk):
     magwheelTransaction = Magwheel.objects.get(id=pk)
     if request.method == "GET":
@@ -500,7 +501,7 @@ def deleteMagwheelTransaction(request, pk):
 ########################################################################################################################
 ########################################################################################################################
 
-
+@login_required
 def viewMasterlist(request):
     # Get all rows in masterlist
     masterlist = get_masterlist_data()
@@ -518,7 +519,7 @@ def viewMasterlist(request):
 
     # Render the template
     return render(request, 'inventory/masterlist.html', context)
-
+@login_required
 @csrf_exempt
 def refresh_tires(request):
     if request.method == "POST":  # Ensure it's a POST request
@@ -530,7 +531,7 @@ def refresh_tires(request):
 
         return JsonResponse({"status": "Cache invalidated"})
     return JsonResponse({"status": "Invalid method"}, status=405)
-
+@login_required
 @csrf_exempt
 def refresh_magwheels(request):
     if request.method == "POST":  # Ensure it's a POST request
@@ -548,7 +549,7 @@ def refresh_magwheels(request):
 ########################################################################################################################
 ########################################################################################################################
 
-
+@login_required
 def fullTransactionView(request):
     # Get transaction items from the session
     transaction_items = request.session.get('transaction_items', [])
@@ -593,7 +594,7 @@ def fullTransactionView(request):
 
 # Version 2.0 below. 
 # Transactions, Tires/Magwheels/Services/Accessories Session, Tires/Magwheels/Services/Accessories Save
-
+@login_required
 def v2_create_transaction(request):
     draft_data = request.session.get('transaction_draft')
 
@@ -671,25 +672,25 @@ def v2_create_transaction(request):
     }
 
     return render(request, 'inventory/v2_addTransaction.html', context)
-
+@login_required
 @csrf_exempt
 def v2_save_transaction_draft(request):
     if request.method == 'POST':
         request.session['transaction_draft'] = request.POST.dict()
         return JsonResponse({'status': 'ok'})
     return JsonResponse({'status': 'invalid method'}, status=405)
-
+@login_required
 def v2_cancel_transaction(request):
     request.session.pop('transaction_draft', None)
     request.session.pop('unsaved_tires', None)
     request.session.pop('unsaved_magwheels', None)
     request.session.pop('unsaved_payments', None)
     return redirect('inventory:v2-view-all-transactions')
-
+@login_required
 def v2_viewAllTransactions(request):
     transactions = Transaction.objects.all().order_by('-date')
     return render(request, 'inventory/v2_allTransactions.html', {'transactions': transactions})
-
+@login_required
 def v2_expandTransaction(request, pk):
     transaction = get_object_or_404(Transaction, pk = pk)
     payments = TransactionPayment.objects.filter(transaction = transaction)
@@ -704,7 +705,7 @@ def v2_expandTransaction(request, pk):
     }
 
     return render(request, 'inventory/v2_expandTransaction.html', context)
-
+@login_required
 def v2_editTransaction(request, pk):
     transaction = get_object_or_404(Transaction, pk = pk)
     if request.method == "POST":
@@ -724,12 +725,12 @@ def v2_editTransaction(request, pk):
     }
 
     return render(request, 'inventory/v2_editTransaction.html', context)
-
+@login_required
 def v2_deleteTransaction(request, pk):
     transaction = get_object_or_404(Transaction, pk = pk)
     transaction.delete()
     return redirect('inventory:v2-view-all-transactions')
-
+@login_required
 def v2_addTire(request, index = None):
     tires = request.session.get('unsaved_tires', [])
 
@@ -772,7 +773,7 @@ def v2_addTire(request, index = None):
     }
 
     return render(request, 'inventory/v2_addTire.html', context)
-
+@login_required
 def v2_deleteTire(request, index):
     tires = request.session.get('unsaved_tires', [])
     if 0 <= int(index) < len(tires):
@@ -780,7 +781,7 @@ def v2_deleteTire(request, index):
         request.session['unsaved_tires'] = tires
         request.session.modified = True
     return redirect('inventory:v2-create-transaction')
-
+@login_required
 def v2_addMagwheel(request, index = None):
     magwheels = request.session.get('unsaved_magwheels', [])
 
@@ -827,7 +828,7 @@ def v2_addMagwheel(request, index = None):
     }
 
     return render(request, 'inventory/v2_addMagwheel.html', context)
-
+@login_required
 def v2_deleteMagwheel(request, index):
     magwheels = request.session.get('unsaved_magwheels', [])
     if 0 <= int(index) < len(magwheels):
@@ -835,7 +836,7 @@ def v2_deleteMagwheel(request, index):
         request.session['unsaved_magwheels'] = magwheels
         request.session.modified = True
     return redirect('inventory:v2-create-transaction')
-
+@login_required
 def v2_viewAllTires(request):
     tires = TireModel.objects.select_related('transaction').order_by('-transaction__date', 'id')
 
@@ -843,7 +844,7 @@ def v2_viewAllTires(request):
         'tires': tires,
     }
     return render(request,'inventory/v2_allTires.html', context)
-
+@login_required
 def v2_editSavedTire(request, pk):
     tire = get_object_or_404(TireModel, pk = pk)
 
@@ -872,12 +873,12 @@ def v2_editSavedTire(request, pk):
     }
 
     return render(request, 'inventory/v2_editSavedTire.html', context)
-
+@login_required
 def v2_deleteSavedTire(request, pk):
     tire = get_object_or_404(TireModel, pk = pk)
     tire.delete()
     return redirect('inventory:v2-view-all-tires')
-
+@login_required
 def v2_editSavedMagwheel(request, pk):
     magwheel = get_object_or_404(MagwheelModel, pk = pk)
 
@@ -911,12 +912,12 @@ def v2_editSavedMagwheel(request, pk):
     }
 
     return render(request, 'inventory/v2_editSavedMagwheel.html', context)
-
+@login_required
 def v2_deleteSavedMagwheel(request, pk):
     magwheel = get_object_or_404(MagwheelModel, pk = pk)
     magwheel.delete()
     return redirect('inventory:v2-view-all-magwheels')
-
+@login_required
 def v2_viewAllMagwheels(request):
     magwheels = MagwheelModel.objects.select_related('transaction').order_by('-transaction__date', 'id')
 
@@ -924,7 +925,7 @@ def v2_viewAllMagwheels(request):
         'magwheels': magwheels,
     }
     return render(request, 'inventory/v2_allMagwheels.html', context)
-
+@login_required
 def v2_viewSummaryTires(request):
     tires = (
         TireModel.objects
@@ -962,7 +963,7 @@ def v2_viewSummaryTires(request):
     }
 
     return render(request, 'inventory/v2_viewSummaryTires.html', context)
-
+@login_required
 def v2_viewSummaryMagwheels(request):
     magwheels = (
         MagwheelModel.objects
@@ -997,7 +998,7 @@ def v2_viewSummaryMagwheels(request):
     }
 
     return render(request, 'inventory/v2_viewSummaryMagwheels.html', context)
-
+@login_required
 def v2_queryTires(request):
     # Start with all tires and select related transactions
     tires = TireModel.objects.select_related('transaction').all()
@@ -1082,7 +1083,7 @@ def v2_queryTires(request):
     }
 
     return render(request, 'inventory/v2_queryTires.html', context)
-
+@login_required
 def v2_queryMagwheels(request):
     # Start with all magwheels and select related transactions
     magwheels = MagwheelModel.objects.select_related('transaction').all()
@@ -1182,7 +1183,7 @@ def v2_queryMagwheels(request):
     }
 
     return render(request, 'inventory/v2_queryMagwheels.html', context)
-
+@login_required
 def v2_addPayment(request, index = None):
     payments = request.session.get('unsaved_payments', [])
 
@@ -1216,7 +1217,7 @@ def v2_addPayment(request, index = None):
     }
 
     return render(request, 'inventory/v2_addPayment.html', context)
-
+@login_required
 def v2_deletePayment(request, index):
     payments = request.session.get('unsaved_payments', [])
     if 0 <= int(index) < len(payments):
@@ -1224,7 +1225,7 @@ def v2_deletePayment(request, index):
         request.session['unsaved_payments'] = payments
         request.session.modified = True
     return redirect('inventory:v2-create-transaction')
-
+@login_required
 def v2_editSavedPayment(request, transaction_id, pk):
     payment = get_object_or_404(TransactionPayment, pk = pk, transaction_id = transaction_id)
 
@@ -1246,10 +1247,9 @@ def v2_editSavedPayment(request, transaction_id, pk):
     }
 
     return render(request, 'inventory/v2_editSavedPayment.html', context)
-
+@login_required
 def is_admin(user):
     return user.is_authenticated and user.is_staff # or user.is_superuser
-
 @login_required
 @user_passes_test(is_admin)
 def v2_paymentReportView(request):
@@ -1418,7 +1418,6 @@ def v2_paymentReportView(request):
     }
 
     return render(request, 'inventory/v2_paymentReportView.html', context)
-
 @login_required
 @user_passes_test(is_admin)
 def v2_paymentReportExport(request):
