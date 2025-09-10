@@ -82,6 +82,15 @@
                     </div>
                 {% endfor %}
             {% endif %}
+
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+    
+                <button type="submit" class="confirm-btn">Confirm Transaction</button>
+                <button type="button" class="cancel-btn button-link" 
+                        onclick="window.location.href='/inventory/v2/transaction/cancel/'">
+                    Cancel
+                </button>
+            </div>
         </form>
 
         <p><span style="color: red;">**</span> <em>- required for all transactions</em></p>
@@ -156,15 +165,6 @@
 
     </div>
     
-</div>
-
-<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
-    
-    <button type="submit" class="confirm-btn">Confirm Transaction</button>
-    <button type="button" class="cancel-btn button-link" 
-            onclick="window.location.href='/inventory/v2/transaction/cancel/'">
-        Cancel
-    </button>
 </div>
 
 <hr>
