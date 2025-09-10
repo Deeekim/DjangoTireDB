@@ -39,11 +39,7 @@ class TireForm(forms.Form):
     remarks = forms.CharField(max_length=255, required=False)
 
     SUPPLIER_CHOICES = [
-        ('RC', 'RC'),
-        ('ENT', 'ENT'),
-        ('SP', 'SP'),
-        ('YHI', 'YHI'),
-        ('PWG', 'PWG'),
+        (supplier, supplier) for supplier in suppliers
     ]
     supplier = forms.ChoiceField(choices=SUPPLIER_CHOICES, required=False)
 
@@ -60,60 +56,32 @@ class MagwheelForm(forms.Form):
     bore = forms.CharField(max_length=255, required=False)
     color = forms.CharField(max_length=255, required=True)
     SUPPLIER_CHOICES = [
-        ('RC', 'RC'),
-        ('ENT', 'ENT'),
-        ('SP', 'SP'),
-        ('YHI', 'YHI'),
-        ('PWG', 'PWG'),
+        (supplier, supplier) for supplier in suppliers
     ]
     supplier = forms.ChoiceField(choices = SUPPLIER_CHOICES, required = False)
     notes = forms.CharField(widget = forms.Textarea, required = False)
 
 class SavedTireForm(forms.ModelForm):
     class Meta:
-        model = Tire_test
+        model = TireModel
         exclude = ['transaction']
 
 class SavedMagwheelForm(forms.ModelForm):
     class Meta:
-        model = Magwheel_test
+        model = MagwheelModel
         exclude = ['transaction']
 
 class TransactionPaymentForm(forms.Form):
     PAYMENT_METHOD_CHOICES = [
-        ('Cash', 'Cash'),
-        ('GCash', 'GCash'),
-        ('Bank Transfer', 'Bank Transfer'),
-        ('Cheque', 'Cheque'),
-        ('Credit Card', 'Credit Card'),
-        ('Debit Card', 'Debit Card'),
-        ('BDO Checkout', 'BDO Checkout'),
-        ('Receivables', 'Receivables'),
-        ('Payables', 'Payables'),
+        (method, method) for method in payment_method_choices
     ]
 
     CREDIT_CARD_CHOICES = [
-        ('BDO Striaght', 'BDO Straight'),
-        ('BDO 3mos', 'BDO 3mos'),
-        ('BDO 6mos', 'BDO 6mos'),
-        ('BDO 12mos', 'BDO 12mos'),
-        ('BDO 24mos', 'BDO 24mos'),
-        ('BPI Striaght', 'BPI Straight'),
-        ('BPI 3mos', 'BPI 3mos'),
-        ('BPI 6mos', 'BPI 6mos'),
-        ('BPI 12mos', 'BPI 12mos'),
-        ('BPI 24mos', 'BPI 24mos'),
-        ('MetroBank Striaght', 'MetroBank Straight'),
-        ('MetroBank 3mos', 'MetroBank 3mos'),
-        ('MetroBank 6mos', 'MetroBank 6mos'),
-        ('MetroBank 12mos', 'MetroBank 12mos'),
-        ('MetroBank 24mos', 'MetroBank 24mos'),
+        (cc[0], cc[0]) for cc in cc_discount_rates
     ]
 
     DEBIT_CARD_CHOICES = [
-        ('BDO', 'BDO'),
-        ('BPI', 'BPI'),
-        ('MetroBank', 'MetroBank'),
+        (dc[0], dc[0]) for dc in dc_discount_rates
     ]
 
     method = forms.ChoiceField(choices=PAYMENT_METHOD_CHOICES, required=True)
@@ -161,10 +129,7 @@ class PaymentReportForm(forms.Form):
     end_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
 
     LOCATION_CHOICES = [
-        ('Armada', 'Armada'),
-        ('Legacy', 'Legacy'),
-        ('Main', 'Main'),
-        ('Premiere', 'Premiere'),
+        (location, location) for location in all_locations
     ]
 
     locations = forms.MultipleChoiceField(choices=LOCATION_CHOICES, widget=forms.CheckboxSelectMultiple)

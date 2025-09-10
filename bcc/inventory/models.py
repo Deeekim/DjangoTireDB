@@ -1,6 +1,7 @@
 from django.db import models
-# from .dependency import TIRES_BRAND_CHOICES, MAGWHEELS_BRAND_CHOICES
 from .dependency import *
+
+### Version 1 ###
 
 class Tire(models.Model):
     # Invoice Number - Integer field
@@ -20,7 +21,7 @@ class Tire(models.Model):
         ('Armada', 'Armada'),
         ('Legacy', 'Legacy'),
         ('Main', 'Main'),
-        ('Premiere', 'Premiere'),
+        ('Premier', 'Premier'),
     ]
     location = models.CharField(max_length=255, choices=LOCATION_CHOICES)
 
@@ -144,6 +145,7 @@ class Magwheel(models.Model):
         verbose_name = 'Magwheel'
         verbose_name_plural = 'Magwheels'
 
+### Version 2 ###
 
 class Transaction(models.Model):
     invoice_number = models.IntegerField(blank=True, null=True, default=None)
@@ -160,7 +162,7 @@ class Transaction(models.Model):
     def __str__(self):
         return f"Invoice {self.invoice_number} - {self.sold_to} ({self.date})"
 
-class Tire_test(models.Model):
+class TireModel(models.Model):
     transaction = models.ForeignKey('Transaction', on_delete=models.CASCADE, related_name='tires',null=True,blank = True)
 
     qty = models.PositiveIntegerField()
@@ -175,9 +177,7 @@ class Tire_test(models.Model):
 
     def __str__(self):
         return f"{self.brand} {self.model} {self.size} {self.specs} {self.load} - {self.supplier}"
-    
-
-class Magwheel_test(models.Model):
+class MagwheelModel(models.Model):
     transaction = models.ForeignKey('Transaction', on_delete=models.CASCADE, related_name='magwheels',null = True, blank = True)
 
     qty = models.PositiveIntegerField()

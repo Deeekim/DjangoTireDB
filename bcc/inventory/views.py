@@ -632,12 +632,12 @@ def v2_create_transaction(request):
                 # 3. Save tires from session
                 tires = request.session.get('unsaved_tires', [])
                 for tire_data in tires:
-                    Tire_test.objects.create(transaction=transaction, **tire_data)
+                    TireModel.objects.create(transaction=transaction, **tire_data)
                 
                 # 4. Save magwheels from session
                 magwheels = request.session.get('unsaved_magwheels', [])
                 for mag_data in magwheels:
-                    Magwheel_test.objects.create(transaction=transaction, **mag_data)
+                    MagwheelModel.objects.create(transaction=transaction, **mag_data)
                     
                 # 5. Clear session
                 request.session['unsaved_payments'] = []
@@ -693,8 +693,8 @@ def v2_viewAllTransactions(request):
 def v2_expandTransaction(request, pk):
     transaction = get_object_or_404(Transaction, pk = pk)
     payments = TransactionPayment.objects.filter(transaction = transaction)
-    tires = Tire_test.objects.filter(transaction = transaction)
-    magwheels = Magwheel_test.objects.filter(transaction = transaction)
+    tires = TireModel.objects.filter(transaction = transaction)
+    magwheels = MagwheelModel.objects.filter(transaction = transaction)
 
     context = {
         'transaction': transaction,
@@ -837,7 +837,7 @@ def v2_deleteMagwheel(request, index):
     return redirect('inventory:v2-create-transaction')
 
 def v2_viewAllTires(request):
-    tires = Tire_test.objects.select_related('transaction').order_by('-transaction__date', 'id')
+    tires = TireModel.objects.select_related('transaction').order_by('-transaction__date', 'id')
 
     context = {
         'tires': tires,
@@ -845,7 +845,7 @@ def v2_viewAllTires(request):
     return render(request,'inventory/v2_allTires.html', context)
 
 def v2_editSavedTire(request, pk):
-    tire = get_object_or_404(Tire_test, pk = pk)
+    tire = get_object_or_404(TireModel, pk = pk)
 
     TIRES_BRAND_CHOICES = get_tires_brand_choices()
     TIRES_BRAND_SIZE_CHOICES = get_tires_brand_size_choices()
@@ -874,12 +874,12 @@ def v2_editSavedTire(request, pk):
     return render(request, 'inventory/v2_editSavedTire.html', context)
 
 def v2_deleteSavedTire(request, pk):
-    tire = get_object_or_404(Tire_test, pk = pk)
+    tire = get_object_or_404(TireModel, pk = pk)
     tire.delete()
     return redirect('inventory:v2-view-all-tires')
 
 def v2_editSavedMagwheel(request, pk):
-    magwheel = get_object_or_404(Magwheel_test, pk = pk)
+    magwheel = get_object_or_404(MagwheelModel, pk = pk)
 
     # Choices creation
     MAGWHEELS_BRAND_CHOICES = get_magwheels_brand_choices()
@@ -913,12 +913,12 @@ def v2_editSavedMagwheel(request, pk):
     return render(request, 'inventory/v2_editSavedMagwheel.html', context)
 
 def v2_deleteSavedMagwheel(request, pk):
-    magwheel = get_object_or_404(Magwheel_test, pk = pk)
+    magwheel = get_object_or_404(MagwheelModel, pk = pk)
     magwheel.delete()
     return redirect('inventory:v2-view-all-magwheels')
 
 def v2_viewAllMagwheels(request):
-    magwheels = Magwheel_test.objects.select_related('transaction').order_by('-transaction__date', 'id')
+    magwheels = MagwheelModel.objects.select_related('transaction').order_by('-transaction__date', 'id')
 
     context = {
         'magwheels': magwheels,
@@ -927,7 +927,7 @@ def v2_viewAllMagwheels(request):
 
 def v2_viewSummaryTires(request):
     tires = (
-        Tire_test.objects
+        TireModel.objects
         .select_related('transaction')  # Efficiently pull related Transaction data
         .annotate(
             inventory_effect=Case(
@@ -965,7 +965,7 @@ def v2_viewSummaryTires(request):
 
 def v2_viewSummaryMagwheels(request):
     magwheels = (
-        Magwheel_test.objects
+        MagwheelModel.objects
         .select_related('transaction')  # Efficiently pull related Transaction data
         .annotate(
             inventory_effect=Case(
@@ -1000,7 +1000,7 @@ def v2_viewSummaryMagwheels(request):
 
 def v2_queryTires(request):
     # Start with all tires and select related transactions
-    tires = Tire_test.objects.select_related('transaction').all()
+    tires = TireModel.objects.select_related('transaction').all()
 
     # Define default filter values
     filters = {
@@ -1085,7 +1085,7 @@ def v2_queryTires(request):
 
 def v2_queryMagwheels(request):
     # Start with all magwheels and select related transactions
-    magwheels = Magwheel_test.objects.select_related('transaction').all()
+    magwheels = MagwheelModel.objects.select_related('transaction').all()
 
     # Define default filter values
     filters = {

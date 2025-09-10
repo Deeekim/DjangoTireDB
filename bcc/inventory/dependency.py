@@ -8,7 +8,7 @@ banks = [
     'BDO', 'BPI', 'MetroBank'
 ]
 all_locations = [
-    'Armada', 'Legacy', 'Main', 'Premiere'
+    'Armada', 'Legacy', 'Main', 'Premier'
 ]
 cc_discount_rates = [
     ('BDO Striaght', 0.0325),
@@ -39,14 +39,14 @@ bdo_online_discount_rate = 0.04
 # Transaction Details
 payment_method_choices = [
     'Cash',
-    'GCash',
     'Bank Transfer',
+    'BDO Checkout',
     'Cheque',
     'Credit Card',
     'Debit Card',
-    'BDO Checkout',
-    'Receivables',
+    'GCash',
     'Payables',
+    'Receivables',
 ]
 suppliers = [
     'RC',
