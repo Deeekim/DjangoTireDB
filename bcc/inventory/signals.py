@@ -13,4 +13,9 @@ def payment_saved(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=TransactionPayment)
 def payment_deleted(sender, instance, **kwargs):
-    update_transaction_amount(instance.transaction)
+    try:
+        transaction = instance.transaction
+        update_transaction_amount(transaction)
+    except instance._meta.get_field("transaction").related_model.DoesNotExist:
+        # Transaction is already deleted → safe to ignore
+        pass
