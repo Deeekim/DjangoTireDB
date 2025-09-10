@@ -9,13 +9,14 @@
 <table>
     <thead>
         <tr>
-            <th>Invoice #</th>
-            <th>Sold To</th>
-            <th>Date</th>
-            <th>Salesperson</th>
-            <th>Location</th>
-            <th>Inventory</th>
-            <th>Actions</th>
+            <th width = "100 px">Invoice #</th>
+            <th width = "150 px">Sold To</th>
+            <th width = "150 px">Date</th>
+            <th width = "120 px">Salesperson</th>
+            <th width = "100 px">Location</th>
+            <th>Notes</th>
+            <th width = "150 px">Inventory</th>
+            <th width = "200 px">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -26,10 +27,10 @@
             <td>{{ txn.date }}</td>
             <td>{{ txn.salesperson }}</td>
             <td>{{ txn.get_location_display }}</td>
+            <td>{{ txn.notes }}</td>
             <td>{{ txn.get_transaction_type_display }}</td>
             <td>
                 <a href="{% url 'inventory:v2-expand-transaction' txn.pk %}" class="view-btn">View</a>
-                <a href="{% url 'inventory:v2-edit-transaction' txn.pk %}" class="edit-btn">Edit</a>
                 <a href="{% url 'inventory:v2-delete-transaction' txn.pk %}" class="delete-btn">Delete</a>
             </td>
         </tr>
