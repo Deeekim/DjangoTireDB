@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="").split(",")
 
@@ -55,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'bcc.middleware.LoginRequiredMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
@@ -127,6 +128,18 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+LOGIN_URL = "/accounts/login"
+LOGIN_REDIRECT_URL = "/inventory/home/"
+LOGOUT_REDIRECT_URL = LOGIN_URL
+
+LOGIN_EXEMPT_URLS = [
+    "/accounts/login/",
+    "/accounts/logout/",
+    "/static/",
+    "/media/",
+    "/favicon.ico",
 ]
 
 
